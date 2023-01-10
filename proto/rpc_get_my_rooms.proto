@@ -7,9 +7,9 @@ import "room.proto";
 option go_package = "github.com/abdulkarimogaji/go-chat/pb";
 
 message GetMyRoomsRequest {
-  string access_token = 1;
+  int32 user_id = 1;
 }
 
 message GetMyRoomsResponse {
-  repeated Room room = 1;
+  Room room = 1;
 }
