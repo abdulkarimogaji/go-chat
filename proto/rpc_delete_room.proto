@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package pb;
+
+
+option go_package = "github.com/abdulkarimogaji/go-chat/pb";
+
+message DeleteRoomRequest {
+  string access_token = 1;
+  int32 room_id = 2;
+}
+
+message DeleteRoomResponse {
+  int32 deleted_room_id = 1;
+}

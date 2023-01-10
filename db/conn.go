@@ -2,6 +2,7 @@ package db
 
 import (
 	"database/sql"
+	"fmt"
 )
 
 type Store struct {
@@ -10,16 +11,20 @@ type Store struct {
 
 // ConnectDatabase returns db.Store
 func ConnectDatabase(uri string) (*Store, error) {
-	db, err := sql.Open("mysql", uri)
+	conn, err := sql.Open("mysql", uri)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("Error Connecting %v", err)
 	}
 
 	// create tables
-	// _, err = db.Exec(createTableUser)
-	// if err != nil {
-	// 	return nil, err
-	// }
+	prep, err := conn.Prepare(createTableUser)
+	if err != nil {
+		return nil, fmt.Errorf("Error Preparing %v", err)
+	}
+	_, err = prep.Exec()
+	if err != nil {
+		return nil, fmt.Errorf("Error Executing %v", err)
+	}
 
-	return &Store{DB: db}, nil
+	return &Store{DB: conn}, nil
 }

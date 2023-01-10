@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package pb;
+
+import "google/protobuf/timestamp.proto";
+
+option go_package = "github.com/abdulkarimogaji/go-chat/pb";
+
+message Chat {
+  int32 id = 1;
+  int32 room_id = 2;
+  int32 sender_id = 3;
+  string message = 4;
+  bool unread = 5;
+  google.protobuf.Timestamp timestamp = 6;
+}

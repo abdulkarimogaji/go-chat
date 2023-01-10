@@ -5,6 +5,12 @@ package pb;
 // import "user.proto";
 import "rpc_create_user.proto";
 import "rpc_login_user.proto";
+import "rpc_delete_user.proto";
+import "rpc_create_room.proto";
+import "rpc_delete_room.proto";
+import "rpc_get_my_rooms.proto";
+import "rpc_send_message.proto";
+import "rpc_receive_message.proto";
 
 
 option go_package = "github.com/abdulkarimogaji/go-chat/pb";
@@ -12,4 +18,10 @@ option go_package = "github.com/abdulkarimogaji/go-chat/pb";
 service GoChat {
   rpc CreateUser (CreateUserRequest) returns (CreateUserResponse) {}
   rpc LoginUser (LoginRequest) returns (LoginResponse) {}
+  rpc DeleteUser (DeleteUserRequest) returns (DeleteUserResponse) {}
+  rpc CreateRoom (CreateRoomRequest) returns (CreateRoomResponse) {}
+  rpc DeleteRoom (DeleteRoomRequest) returns (DeleteRoomResponse) {}
+  rpc GetMyRooms (GetMyRoomsRequest) returns (GetMyRoomsResponse) {}
+  rpc sendMessage (SendMessageRequest) returns (SendMessageResponse) {}
+  rpc receiveMessages (ReceiveMessageRequest) returns (stream ReceiveMessageResponse) {}
 }
