@@ -2,7 +2,6 @@ syntax = "proto3";
 
 package pb;
 
-// import "user.proto";
 import "rpc_create_user.proto";
 import "rpc_login_user.proto";
 import "rpc_delete_user.proto";
@@ -11,17 +10,23 @@ import "rpc_delete_room.proto";
 import "rpc_get_my_rooms.proto";
 import "rpc_send_message.proto";
 import "rpc_receive_message.proto";
-
+import "google/api/annotations.proto";
 
 option go_package = "github.com/abdulkarimogaji/go-chat/pb";
 
 service GoChat {
-  rpc CreateUser (CreateUserRequest) returns (CreateUserResponse) {}
+  rpc CreateUser (CreateUserRequest) returns (CreateUserResponse) {
+    option (google.api.http) = {
+           post: "/v1/example/echo"
+            body: "*"
+          };
+        
+  }
   rpc LoginUser (LoginRequest) returns (LoginResponse) {}
   rpc DeleteUser (DeleteUserRequest) returns (DeleteUserResponse) {}
   rpc CreateRoom (CreateRoomRequest) returns (CreateRoomResponse) {}
   rpc DeleteRoom (DeleteRoomRequest) returns (DeleteRoomResponse) {}
-  rpc GetMyRooms (GetMyRoomsRequest) returns (GetMyRoomsResponse) {}
+  rpc GetMyRooms (GetMyRoomsRequest) returns (stream GetMyRoomsResponse) {}
   rpc sendMessage (SendMessageRequest) returns (SendMessageResponse) {}
   rpc receiveMessages (ReceiveMessageRequest) returns (stream ReceiveMessageResponse) {}
 }

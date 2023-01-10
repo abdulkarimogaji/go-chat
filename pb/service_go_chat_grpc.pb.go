@@ -27,7 +27,7 @@ type GoChatClient interface {
 	DeleteUser(ctx context.Context, in *DeleteUserRequest, opts ...grpc.CallOption) (*DeleteUserResponse, error)
 	CreateRoom(ctx context.Context, in *CreateRoomRequest, opts ...grpc.CallOption) (*CreateRoomResponse, error)
 	DeleteRoom(ctx context.Context, in *DeleteRoomRequest, opts ...grpc.CallOption) (*DeleteRoomResponse, error)
-	GetMyRooms(ctx context.Context, in *GetMyRoomsRequest, opts ...grpc.CallOption) (*GetMyRoomsResponse, error)
+	GetMyRooms(ctx context.Context, in *GetMyRoomsRequest, opts ...grpc.CallOption) (GoChat_GetMyRoomsClient, error)
 	SendMessage(ctx context.Context, in *SendMessageRequest, opts ...grpc.CallOption) (*SendMessageResponse, error)
 	ReceiveMessages(ctx context.Context, in *ReceiveMessageRequest, opts ...grpc.CallOption) (GoChat_ReceiveMessagesClient, error)
 }
@@ -85,13 +85,36 @@ func (c *goChatClient) DeleteRoom(ctx context.Context, in *DeleteRoomRequest, op
 	return out, nil
 }
 
-func (c *goChatClient) GetMyRooms(ctx context.Context, in *GetMyRoomsRequest, opts ...grpc.CallOption) (*GetMyRoomsResponse, error) {
-	out := new(GetMyRoomsResponse)
-	err := c.cc.Invoke(ctx, "/pb.GoChat/GetMyRooms", in, out, opts...)
+func (c *goChatClient) GetMyRooms(ctx context.Context, in *GetMyRoomsRequest, opts ...grpc.CallOption) (GoChat_GetMyRoomsClient, error) {
+	stream, err := c.cc.NewStream(ctx, &GoChat_ServiceDesc.Streams[0], "/pb.GoChat/GetMyRooms", opts...)
 	if err != nil {
 		return nil, err
 	}
-	return out, nil
+	x := &goChatGetMyRoomsClient{stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+type GoChat_GetMyRoomsClient interface {
+	Recv() (*GetMyRoomsResponse, error)
+	grpc.ClientStream
+}
+
+type goChatGetMyRoomsClient struct {
+	grpc.ClientStream
+}
+
+func (x *goChatGetMyRoomsClient) Recv() (*GetMyRoomsResponse, error) {
+	m := new(GetMyRoomsResponse)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
 }
 
 func (c *goChatClient) SendMessage(ctx context.Context, in *SendMessageRequest, opts ...grpc.CallOption) (*SendMessageResponse, error) {
@@ -104,7 +127,7 @@ func (c *goChatClient) SendMessage(ctx context.Context, in *SendMessageRequest, 
 }
 
 func (c *goChatClient) ReceiveMessages(ctx context.Context, in *ReceiveMessageRequest, opts ...grpc.CallOption) (GoChat_ReceiveMessagesClient, error) {
-	stream, err := c.cc.NewStream(ctx, &GoChat_ServiceDesc.Streams[0], "/pb.GoChat/receiveMessages", opts...)
+	stream, err := c.cc.NewStream(ctx, &GoChat_ServiceDesc.Streams[1], "/pb.GoChat/receiveMessages", opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -144,7 +167,7 @@ type GoChatServer interface {
 	DeleteUser(context.Context, *DeleteUserRequest) (*DeleteUserResponse, error)
 	CreateRoom(context.Context, *CreateRoomRequest) (*CreateRoomResponse, error)
 	DeleteRoom(context.Context, *DeleteRoomRequest) (*DeleteRoomResponse, error)
-	GetMyRooms(context.Context, *GetMyRoomsRequest) (*GetMyRoomsResponse, error)
+	GetMyRooms(*GetMyRoomsRequest, GoChat_GetMyRoomsServer) error
 	SendMessage(context.Context, *SendMessageRequest) (*SendMessageResponse, error)
 	ReceiveMessages(*ReceiveMessageRequest, GoChat_ReceiveMessagesServer) error
 	mustEmbedUnimplementedGoChatServer()
@@ -169,8 +192,8 @@ func (UnimplementedGoChatServer) CreateRoom(context.Context, *CreateRoomRequest)
 func (UnimplementedGoChatServer) DeleteRoom(context.Context, *DeleteRoomRequest) (*DeleteRoomResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteRoom not implemented")
 }
-func (UnimplementedGoChatServer) GetMyRooms(context.Context, *GetMyRoomsRequest) (*GetMyRoomsResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetMyRooms not implemented")
+func (UnimplementedGoChatServer) GetMyRooms(*GetMyRoomsRequest, GoChat_GetMyRoomsServer) error {
+	return status.Errorf(codes.Unimplemented, "method GetMyRooms not implemented")
 }
 func (UnimplementedGoChatServer) SendMessage(context.Context, *SendMessageRequest) (*SendMessageResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SendMessage not implemented")
@@ -281,22 +304,25 @@ func _GoChat_DeleteRoom_Handler(srv interface{}, ctx context.Context, dec func(i
 	return interceptor(ctx, in, info, handler)
 }
 
-func _GoChat_GetMyRooms_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetMyRoomsRequest)
-	if err := dec(in); err != nil {
-		return nil, err
+func _GoChat_GetMyRooms_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(GetMyRoomsRequest)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
 	}
-	if interceptor == nil {
-		return srv.(GoChatServer).GetMyRooms(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/pb.GoChat/GetMyRooms",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(GoChatServer).GetMyRooms(ctx, req.(*GetMyRoomsRequest))
-	}
-	return interceptor(ctx, in, info, handler)
+	return srv.(GoChatServer).GetMyRooms(m, &goChatGetMyRoomsServer{stream})
+}
+
+type GoChat_GetMyRoomsServer interface {
+	Send(*GetMyRoomsResponse) error
+	grpc.ServerStream
+}
+
+type goChatGetMyRoomsServer struct {
+	grpc.ServerStream
+}
+
+func (x *goChatGetMyRoomsServer) Send(m *GetMyRoomsResponse) error {
+	return x.ServerStream.SendMsg(m)
 }
 
 func _GoChat_SendMessage_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
@@ -366,15 +392,16 @@ var GoChat_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _GoChat_DeleteRoom_Handler,
 		},
 		{
-			MethodName: "GetMyRooms",
-			Handler:    _GoChat_GetMyRooms_Handler,
-		},
-		{
 			MethodName: "sendMessage",
 			Handler:    _GoChat_SendMessage_Handler,
 		},
 	},
 	Streams: []grpc.StreamDesc{
+		{
+			StreamName:    "GetMyRooms",
+			Handler:       _GoChat_GetMyRooms_Handler,
+			ServerStreams: true,
+		},
 		{
 			StreamName:    "receiveMessages",
 			Handler:       _GoChat_ReceiveMessages_Handler,
