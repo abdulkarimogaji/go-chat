@@ -13,7 +13,7 @@ import (
 
 func (s *Server) CreateUser(ctx context.Context, req *pb.CreateUserRequest) (*pb.CreateUserResponse, error) {
 
-	hashedPassword := req.Passowrd + "hashed"
+	hashedPassword := req.Password + "hashed"
 
 	createdUser, err := s.DbStore.CreateUser(&db.User{
 		Username: req.Username,

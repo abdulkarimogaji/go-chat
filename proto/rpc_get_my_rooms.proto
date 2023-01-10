@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package pb;
+
+import "room.proto";
+
+option go_package = "github.com/abdulkarimogaji/go-chat/pb";
+
+message GetMyRoomsRequest {
+  string access_token = 1;
+}
+
+message GetMyRoomsResponse {
+  repeated Room room = 1;
+}

@@ -24,6 +24,12 @@ const _ = grpc.SupportPackageIsVersion7
 type GoChatClient interface {
 	CreateUser(ctx context.Context, in *CreateUserRequest, opts ...grpc.CallOption) (*CreateUserResponse, error)
 	LoginUser(ctx context.Context, in *LoginRequest, opts ...grpc.CallOption) (*LoginResponse, error)
+	DeleteUser(ctx context.Context, in *DeleteUserRequest, opts ...grpc.CallOption) (*DeleteUserResponse, error)
+	CreateRoom(ctx context.Context, in *CreateRoomRequest, opts ...grpc.CallOption) (*CreateRoomResponse, error)
+	DeleteRoom(ctx context.Context, in *DeleteRoomRequest, opts ...grpc.CallOption) (*DeleteRoomResponse, error)
+	GetMyRooms(ctx context.Context, in *GetMyRoomsRequest, opts ...grpc.CallOption) (*GetMyRoomsResponse, error)
+	SendMessage(ctx context.Context, in *SendMessageRequest, opts ...grpc.CallOption) (*SendMessageResponse, error)
+	ReceiveMessages(ctx context.Context, in *ReceiveMessageRequest, opts ...grpc.CallOption) (GoChat_ReceiveMessagesClient, error)
 }
 
 type goChatClient struct {
@@ -52,12 +58,95 @@ func (c *goChatClient) LoginUser(ctx context.Context, in *LoginRequest, opts ...
 	return out, nil
 }
 
+func (c *goChatClient) DeleteUser(ctx context.Context, in *DeleteUserRequest, opts ...grpc.CallOption) (*DeleteUserResponse, error) {
+	out := new(DeleteUserResponse)
+	err := c.cc.Invoke(ctx, "/pb.GoChat/DeleteUser", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *goChatClient) CreateRoom(ctx context.Context, in *CreateRoomRequest, opts ...grpc.CallOption) (*CreateRoomResponse, error) {
+	out := new(CreateRoomResponse)
+	err := c.cc.Invoke(ctx, "/pb.GoChat/CreateRoom", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *goChatClient) DeleteRoom(ctx context.Context, in *DeleteRoomRequest, opts ...grpc.CallOption) (*DeleteRoomResponse, error) {
+	out := new(DeleteRoomResponse)
+	err := c.cc.Invoke(ctx, "/pb.GoChat/DeleteRoom", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *goChatClient) GetMyRooms(ctx context.Context, in *GetMyRoomsRequest, opts ...grpc.CallOption) (*GetMyRoomsResponse, error) {
+	out := new(GetMyRoomsResponse)
+	err := c.cc.Invoke(ctx, "/pb.GoChat/GetMyRooms", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *goChatClient) SendMessage(ctx context.Context, in *SendMessageRequest, opts ...grpc.CallOption) (*SendMessageResponse, error) {
+	out := new(SendMessageResponse)
+	err := c.cc.Invoke(ctx, "/pb.GoChat/sendMessage", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *goChatClient) ReceiveMessages(ctx context.Context, in *ReceiveMessageRequest, opts ...grpc.CallOption) (GoChat_ReceiveMessagesClient, error) {
+	stream, err := c.cc.NewStream(ctx, &GoChat_ServiceDesc.Streams[0], "/pb.GoChat/receiveMessages", opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &goChatReceiveMessagesClient{stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+type GoChat_ReceiveMessagesClient interface {
+	Recv() (*ReceiveMessageResponse, error)
+	grpc.ClientStream
+}
+
+type goChatReceiveMessagesClient struct {
+	grpc.ClientStream
+}
+
+func (x *goChatReceiveMessagesClient) Recv() (*ReceiveMessageResponse, error) {
+	m := new(ReceiveMessageResponse)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
 // GoChatServer is the server API for GoChat service.
 // All implementations must embed UnimplementedGoChatServer
 // for forward compatibility
 type GoChatServer interface {
 	CreateUser(context.Context, *CreateUserRequest) (*CreateUserResponse, error)
 	LoginUser(context.Context, *LoginRequest) (*LoginResponse, error)
+	DeleteUser(context.Context, *DeleteUserRequest) (*DeleteUserResponse, error)
+	CreateRoom(context.Context, *CreateRoomRequest) (*CreateRoomResponse, error)
+	DeleteRoom(context.Context, *DeleteRoomRequest) (*DeleteRoomResponse, error)
+	GetMyRooms(context.Context, *GetMyRoomsRequest) (*GetMyRoomsResponse, error)
+	SendMessage(context.Context, *SendMessageRequest) (*SendMessageResponse, error)
+	ReceiveMessages(*ReceiveMessageRequest, GoChat_ReceiveMessagesServer) error
 	mustEmbedUnimplementedGoChatServer()
 }
 
@@ -70,6 +159,24 @@ func (UnimplementedGoChatServer) CreateUser(context.Context, *CreateUserRequest)
 }
 func (UnimplementedGoChatServer) LoginUser(context.Context, *LoginRequest) (*LoginResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method LoginUser not implemented")
+}
+func (UnimplementedGoChatServer) DeleteUser(context.Context, *DeleteUserRequest) (*DeleteUserResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteUser not implemented")
+}
+func (UnimplementedGoChatServer) CreateRoom(context.Context, *CreateRoomRequest) (*CreateRoomResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateRoom not implemented")
+}
+func (UnimplementedGoChatServer) DeleteRoom(context.Context, *DeleteRoomRequest) (*DeleteRoomResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteRoom not implemented")
+}
+func (UnimplementedGoChatServer) GetMyRooms(context.Context, *GetMyRoomsRequest) (*GetMyRoomsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetMyRooms not implemented")
+}
+func (UnimplementedGoChatServer) SendMessage(context.Context, *SendMessageRequest) (*SendMessageResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SendMessage not implemented")
+}
+func (UnimplementedGoChatServer) ReceiveMessages(*ReceiveMessageRequest, GoChat_ReceiveMessagesServer) error {
+	return status.Errorf(codes.Unimplemented, "method ReceiveMessages not implemented")
 }
 func (UnimplementedGoChatServer) mustEmbedUnimplementedGoChatServer() {}
 
@@ -120,6 +227,117 @@ func _GoChat_LoginUser_Handler(srv interface{}, ctx context.Context, dec func(in
 	return interceptor(ctx, in, info, handler)
 }
 
+func _GoChat_DeleteUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteUserRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(GoChatServer).DeleteUser(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/pb.GoChat/DeleteUser",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(GoChatServer).DeleteUser(ctx, req.(*DeleteUserRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _GoChat_CreateRoom_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateRoomRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(GoChatServer).CreateRoom(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/pb.GoChat/CreateRoom",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(GoChatServer).CreateRoom(ctx, req.(*CreateRoomRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _GoChat_DeleteRoom_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteRoomRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(GoChatServer).DeleteRoom(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/pb.GoChat/DeleteRoom",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(GoChatServer).DeleteRoom(ctx, req.(*DeleteRoomRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _GoChat_GetMyRooms_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetMyRoomsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(GoChatServer).GetMyRooms(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/pb.GoChat/GetMyRooms",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(GoChatServer).GetMyRooms(ctx, req.(*GetMyRoomsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _GoChat_SendMessage_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SendMessageRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(GoChatServer).SendMessage(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/pb.GoChat/sendMessage",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(GoChatServer).SendMessage(ctx, req.(*SendMessageRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _GoChat_ReceiveMessages_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(ReceiveMessageRequest)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(GoChatServer).ReceiveMessages(m, &goChatReceiveMessagesServer{stream})
+}
+
+type GoChat_ReceiveMessagesServer interface {
+	Send(*ReceiveMessageResponse) error
+	grpc.ServerStream
+}
+
+type goChatReceiveMessagesServer struct {
+	grpc.ServerStream
+}
+
+func (x *goChatReceiveMessagesServer) Send(m *ReceiveMessageResponse) error {
+	return x.ServerStream.SendMsg(m)
+}
+
 // GoChat_ServiceDesc is the grpc.ServiceDesc for GoChat service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -135,7 +353,33 @@ var GoChat_ServiceDesc = grpc.ServiceDesc{
 			MethodName: "LoginUser",
 			Handler:    _GoChat_LoginUser_Handler,
 		},
+		{
+			MethodName: "DeleteUser",
+			Handler:    _GoChat_DeleteUser_Handler,
+		},
+		{
+			MethodName: "CreateRoom",
+			Handler:    _GoChat_CreateRoom_Handler,
+		},
+		{
+			MethodName: "DeleteRoom",
+			Handler:    _GoChat_DeleteRoom_Handler,
+		},
+		{
+			MethodName: "GetMyRooms",
+			Handler:    _GoChat_GetMyRooms_Handler,
+		},
+		{
+			MethodName: "sendMessage",
+			Handler:    _GoChat_SendMessage_Handler,
+		},
 	},
-	Streams:  []grpc.StreamDesc{},
+	Streams: []grpc.StreamDesc{
+		{
+			StreamName:    "receiveMessages",
+			Handler:       _GoChat_ReceiveMessages_Handler,
+			ServerStreams: true,
+		},
+	},
 	Metadata: "service_go_chat.proto",
 }

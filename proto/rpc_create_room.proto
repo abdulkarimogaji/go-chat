@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package pb;
+
+import "room.proto";
+
+option go_package = "github.com/abdulkarimogaji/go-chat/pb";
+
+message CreateRoomRequest {
+  int32 user_id = 1;
+  int32 other_user_id = 2;
+  string room_name = 3;
+}
+
+message CreateRoomResponse {
+  Room room = 1;
+}

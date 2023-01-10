@@ -6,19 +6,19 @@ import "google/protobuf/timestamp.proto";
 
 option go_package = "github.com/abdulkarimogaji/go-chat/pb";
 
-message User {
+message Room {
   int32 id = 1;
-  string username = 2;
-  string fullname = 3;
-  string email = 4;
-  string password = 5;
-  Role role = 6;
+  int32 user_id = 2;
+  int32 other_user_id = 3;
+  string room_name = 4;
+  RoomStatus status = 5;
+  int32 last_chat_id = 6;
   google.protobuf.Timestamp created_at = 7;
   google.protobuf.Timestamp updated_at = 8;
 }
 
 
-enum Role {
-  ADMIN = 0;
-  MEMBER = 1;
+enum RoomStatus {
+  INACTIVE = 0;
+  ACTIVE = 1;
 }

@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package pb;
+
+import "chat.proto";
+
+option go_package = "github.com/abdulkarimogaji/go-chat/pb";
+
+message ReceiveMessageRequest {
+  string access_token = 1;
+}
+
+message ReceiveMessageResponse {
+  Chat chat = 1;
+}
