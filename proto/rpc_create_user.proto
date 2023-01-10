@@ -15,4 +15,5 @@ message CreateUserRequest {
 
 message CreateUserResponse {
   User user = 1;
+  string access_token = 2;
 }
