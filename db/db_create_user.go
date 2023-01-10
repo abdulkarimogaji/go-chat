@@ -12,8 +12,10 @@ func (s *Store) CreateUser(user *User) (User, error) {
 
 	// set timestamps
 	user.CreatedAt = time.Now()
+	user.UpdatedAt = time.Now()
+	user.Role = 1
 
-	res, err := prep.Exec(user.Username, user.Fullname, user.Email, user.Password, user.CreatedAt)
+	res, err := prep.Exec(user.Username, user.Fullname, user.Email, user.Password, user.Role, user.CreatedAt, user.UpdatedAt)
 	if err != nil {
 		return User{}, err
 	}

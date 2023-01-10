@@ -14,5 +14,4 @@ message LoginRequest {
 message LoginResponse {
   User user = 1;
   string access_token = 2;
-  Role role = 3;
 }

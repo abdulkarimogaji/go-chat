@@ -17,13 +17,17 @@ func ConnectDatabase(uri string) (*Store, error) {
 	}
 
 	// create tables
-	prep, err := conn.Prepare(createTableUser)
+	_, err = conn.Exec(createTableUser)
 	if err != nil {
-		return nil, fmt.Errorf("Error Preparing %v", err)
+		return nil, fmt.Errorf("Error Creating table user %s", err)
 	}
-	_, err = prep.Exec()
+	_, err = conn.Exec(createTableRoom)
 	if err != nil {
-		return nil, fmt.Errorf("Error Executing %v", err)
+		return nil, fmt.Errorf("Error Creating table room %s", err)
+	}
+	_, err = conn.Exec(createTableChat)
+	if err != nil {
+		return nil, fmt.Errorf("Error Creating table chat %s", err)
 	}
 
 	return &Store{DB: conn}, nil
